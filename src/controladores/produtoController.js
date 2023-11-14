@@ -25,14 +25,15 @@ const cadastrarProduto = async (req, res) => {
       fs.renameSync(imagemTemporaria, caminhoDestino);
       produtoImagem = `https://seu-servidor.com/${novoNomeImagem}`;
     }
+
     const categoriaExistsResult = await db.query(categoriaExistsQuery, categoriaExistsValues);
 
     if (categoriaExistsResult.rows.length === 0) {
       return res.status(400).json({ message: 'A categoria informada não existe' });
     }
 
-    const cadastrarProdutoQuery = 'INSERT INTO produtos (descricao, quantidade_estoque, valor, categoria_id) VALUES ($1, $2, $3, $4) RETURNING *';
-    const cadastrarProdutoValues = [descricao, quantidade_estoque, valor, categoria_id];
+    const cadastrarProdutoQuery = 'INSERT INTO produtos (descricao, quantidade_estoque, valor, categoria_id, produto_imagem) VALUES ($1, $2, $3, $4, $5) RETURNING *';
+    const cadastrarProdutoValues = [descricao, quantidade_estoque, valor, categoria_id, produtoImagem];
 
     const novoProduto = await db.query(cadastrarProdutoQuery, cadastrarProdutoValues);
 
@@ -43,57 +44,58 @@ const cadastrarProduto = async (req, res) => {
   }
 };
 
-
 const editarProduto = async (req, res) => {
-    const produtoId = req.params.id;
-    const { descricao, quantidade_estoque, valor, categoria_id } = req.body;
-  
-    if (!descricao || !quantidade_estoque || !valor || !categoria_id) {
-      return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos' });
+  const produtoId = req.params.id;
+  const { descricao, quantidade_estoque, valor, categoria_id } = req.body;
+
+  if (!descricao || !quantidade_estoque || !valor || !categoria_id) {
+    return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos' });
+  }
+
+  try {
+    let produtoImagem = null;
+    if (req.file) {
+      const imagemTemporaria = req.file.path;
+      const extensao = path.extname(req.file.originalname).toLowerCase();
+      const novoNomeImagem = `${uuidv4()}${extensao}`;
+      const caminhoDestino = path.join(armazenamentoImagem, novoNomeImagem);
+
+      fs.renameSync(imagemTemporaria, caminhoDestino);
+      produtoImagem = `https://seu-servidor.com/${novoNomeImagem}`;
     }
-  
-    try {
-      let produtoImagem = null;
-      if (req.file) {
-        const imagemTemporaria = req.file.path;
-        const extensao = path.extname(req.file.originalname).toLowerCase();
-        const novoNomeImagem = `${uuidv4()}${extensao}`;
-        const caminhoDestino = path.join(armazenamentoImagem, novoNomeImagem);
-  
-        fs.renameSync(imagemTemporaria, caminhoDestino);
-        produtoImagem = `https://seu-servidor.com/${novoNomeImagem}`;
-      }
-      const produtoExistQuery = 'SELECT * FROM produtos WHERE id = $1';
-      const produtoExistValues = [produtoId];
-      const produtoExistResult = await db.query(produtoExistQuery, produtoExistValues);
-  
-      if (produtoExistResult.rows.length === 0) {
-        return res.status(404).json({ message: 'Produto não encontrado' });
-      }
-  
-      const categoriaExistQuery = 'SELECT * FROM categorias WHERE id = $1';
-      const categoriaExistValues = [categoria_id];
-      const categoriaExistResult = await db.query(categoriaExistQuery, categoriaExistValues);
-  
-      if (categoriaExistResult.rows.length === 0) {
-        return res.status(400).json({ message: 'A categoria informada não existe' });
-      }
-  
-      const editarProdutoQuery = 'UPDATE produtos SET descricao = $1, quantidade_estoque = $2, valor = $3, categoria_id = $4 WHERE id = $5 RETURNING *';
-      const editarProdutoValues = [descricao, quantidade_estoque, valor, categoria_id, produtoId];
-      const produtoEditado = await db.query(editarProdutoQuery, editarProdutoValues);
-  
-      res.status(200).json({ message: 'Produto atualizado com sucesso', produto: produtoEditado.rows[0] });
-    } catch (error) {
-      console.error('Erro ao editar produto:', error);
-  
-      if (error.message.includes('does not exist')) {
-        return res.status(404).json({ message: 'Produto não encontrado' });
-      }
-  
-      res.status(500).json({ message: 'Erro interno do servidor' });
+
+    const produtoExistQuery = 'SELECT * FROM produtos WHERE id = $1';
+    const produtoExistValues = [produtoId];
+
+    const produtoExistResult = await db.query(produtoExistQuery, produtoExistValues);
+
+    if (produtoExistResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Produto não encontrado' });
     }
-  };
+
+    const categoriaExistQuery = 'SELECT * FROM categorias WHERE id = $1';
+    const categoriaExistValues = [categoria_id];
+    const categoriaExistResult = await db.query(categoriaExistQuery, categoriaExistValues);
+
+    if (categoriaExistResult.rows.length === 0) {
+      return res.status(400).json({ message: 'A categoria informada não existe' });
+    }
+
+    const editarProdutoQuery = 'UPDATE produtos SET descricao = $1, quantidade_estoque = $2, valor = $3, categoria_id = $4, produto_imagem = $5 WHERE id = $6 RETURNING *';
+    const editarProdutoValues = [descricao, quantidade_estoque, valor, categoria_id, produtoImagem, produtoId];
+    const produtoEditado = await db.query(editarProdutoQuery, editarProdutoValues);
+
+    res.status(200).json({ message: 'Produto atualizado com sucesso', produto: produtoEditado.rows[0] });
+  } catch (error) {
+    console.error('Erro ao editar produto:', error);
+
+    if (error.message.includes('does not exist')) {
+      return res.status(404).json({ message: 'Produto não encontrado' });
+    }
+
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+};
 
   const listarProdutos = async (req, res) => {
     const { categoria_id } = req.query;
