@@ -11,10 +11,12 @@ app.use(express.json());
 const usuarioRoutes = require('./rotas/usuarioRoutes');
 const autenticacaoRoutes = require('./rotas/autenticacaoRoutes');
 const categoriaRoutes = require('./rotas/categoriaRoutes');
+const produtoRoutes = require('./rotas/produtoRoutes');
 
 app.use(usuarioRoutes);
 app.use(autenticacaoRoutes);
 app.use(categoriaRoutes);
+app.use(produtoRoutes)
 
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {

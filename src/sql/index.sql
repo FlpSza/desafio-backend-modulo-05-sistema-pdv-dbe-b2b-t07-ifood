@@ -27,7 +27,7 @@ CREATE TABLE produtos (
     id SERIAL PRIMARY KEY,
     descricao VARCHAR(255) NOT NULL,
     quantidade_estoque INTEGER NOT NULL,
-    valor INTEGER NOT NULL,
+    valor NUMERIC NOT NULL,
     categoria_id INTEGER REFERENCES categorias(id)
 );
 
