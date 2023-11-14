@@ -63,3 +63,4 @@ CREATE TABLE pedido_produtos (
 ALTER TABLE produtos
 ADD COLUMN produto_imagem TEXT;
 
+ALTER SEQUENCE produtos_id_seq RESTART WITH 1;
