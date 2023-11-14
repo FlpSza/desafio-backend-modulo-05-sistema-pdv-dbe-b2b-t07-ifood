@@ -1,0 +1,23 @@
+{
+  "name": "desafio-backend-modulo-05-sistema-pdv-dbe-b2b-t07-ifood",
+  "version": "1.0.0",
+  "description": "Desafio cubos academy",
+  "main": "./src/server.js",
+  "scripts": {
+    "dev": "node --watch ./src/server.js",
+    "start": "nodemon ./src/servidor.js"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@rocketseat/eslint-config": "^2.1.0",
+    "eslint": "^8.52.0",
+    "nodemon": "^3.0.1"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3"
+  }
+}
