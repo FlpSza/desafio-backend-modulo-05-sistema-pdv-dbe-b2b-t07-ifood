@@ -12,11 +12,15 @@ const usuarioRoutes = require('./rotas/usuarioRoutes');
 const autenticacaoRoutes = require('./rotas/autenticacaoRoutes');
 const categoriaRoutes = require('./rotas/categoriaRoutes');
 const produtoRoutes = require('./rotas/produtoRoutes');
+const clienteRoutes = require('./rotas/clienteRoutes')
+const pedidoRoutes = require('./rotas/pedidoRoutes')
 
 app.use(usuarioRoutes);
 app.use(autenticacaoRoutes);
 app.use(categoriaRoutes);
-app.use(produtoRoutes)
+app.use(produtoRoutes);
+app.use(clienteRoutes);
+app.use(pedidoRoutes)
 
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
